@@ -1,0 +1,121 @@
+STRICT LANGUAGE COMPLIANCE RULE
+
+The system messages are in English only for clarity.
+However, EVERYTHING you generate inside the JSON values must be written in the exact target language specified here:
+
+Target Language: {{PROJECT_META_JSON.language_hint}}
+
+Rules:
+1. Produce JSON keys exactly as specified in English.
+2. Produce all JSON string values in the target language only.
+3. This applies to section titles, descriptions, summaries, bridge facts, notes, and all story terminology.
+
+Project meta:
+{{PROJECT_META_JSON}}
+
+Story concept:
+{{STORY_CONCEPT_JSON}}
+
+Story bible:
+{{STORY_BIBLE_JSON}}
+
+Task:
+Create the section architecture for the complete story.
+
+Hard requirements:
+- Return JSON only.
+- Create 4 to 8 sections.
+- Every section must be sequential and causally necessary.
+- The final section must contain the climax and the resolution of the main conflict.
+- Do not create a final section that is only an epilogue.
+- Every section must have a clear time_window.
+- Time must be tracked relative to story day 0.
+- Use integer day values only for time_window.start_day and time_window.end_day.
+- story day 0 means the day the first section begins.
+- If multiple sections happen on the same day, their start_day and end_day may be the same, but the label and continuity notes must clarify the order.
+- If time passes between sections, represent it through between_section_bridges.
+- Bridge facts must also have start_day and end_day.
+- Do not allow unexplained emotional, relationship, skill, knowledge, location, or status changes across a time skip.
+- If a major change happens offscreen, include it in between_section_bridges.facts_available_to_later_sections.
+- Keep sections balanced. Do not put the entire story into one section.
+- Each section must include a meaningful protagonist decision.
+- Each section must have observable mandatory events.
+- Each desired_end_state must describe a changed story state, not a vague mood.
+
+Time-window design rules:
+- Use day-level precision, not hour-level precision.
+- For same-day progression, use label and duration_summary instead of numeric hours.
+- start_day must be less than or equal to end_day.
+- A section must not start before the previous section ends.
+- A same-day direct continuation is allowed.
+- A gap of one or more days should usually have a bridge entry unless nothing relevant changed.
+- Use bridge facts for offscreen practice, travel, recovery, investigation, relationship warming, reputation changes, public reaction, or institutional pressure.
+- Do not use vague time phrases alone. Pair them with integer day values.
+
+Return valid JSON only with this schema:
+
+{
+  "timeline": {
+    "time_unit": "day",
+    "day_zero_definition": "string",
+    "overall_start_day": 0,
+    "overall_end_day": 21,
+    "overall_duration_summary": "string",
+    "time_design_notes": [
+      "specific note about pacing and time continuity"
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "sec_01",
+      "title": "string",
+      "section_role": "opening, escalation, midpoint, crisis, climax_resolution, or other",
+      "narrative_weight": 1.0,
+      "purpose": "dramatic function of this section",
+      "entry_state": "what is true at the start of this section",
+      "time_window": {
+        "start_day": 0,
+        "end_day": 0,
+        "label": "for example: story day 0 evening",
+        "duration_summary": "for example: same evening, about one day, about three days",
+        "time_skip_from_previous": "concrete description of time passed since previous section",
+        "time_continuity_notes": "specific instruction preventing time drift in generation"
+      },
+      "summary": "2-4 sentence summary of actual events in this section",
+      "causality_from_previous": "specific unresolved problem, decision, fact, or consequence that causes this section",
+      "protagonist_decision": "specific meaningful decision made by the protagonist in this section",
+      "mandatory_events": [
+        "specific observable event or beat that must occur"
+      ],
+      "new_facts_established": [
+        "specific new fact made true by this section"
+      ],
+      "state_changes": [
+        "specific observable change by the end of this section"
+      ],
+      "desired_end_state": "what must be true by the end of this section",
+      "ending_trigger": "a concrete signal that this section is ready to end",
+      "next_section_handoff": "what momentum, problem, revelation, or decision carries into the next section",
+      "planned_segments_min": 1,
+      "planned_segments_max": 3
+    }
+  ],
+  "between_section_bridges": [
+    {
+      "bridge_id": "bridge_sec_01_sec_02",
+      "from_section_id": "sec_01",
+      "to_section_id": "sec_02",
+      "start_day": 0,
+      "end_day": 2,
+      "time_elapsed": "string",
+      "offscreen_events": [
+        "specific event that happens between sections but is not necessarily written as a full scene"
+      ],
+      "facts_available_to_later_sections": [
+        "specific fact that later sections may rely on"
+      ],
+      "should_be_written_as_segment": false,
+      "continuity_notes": "how later generation may mention or use this bridge"
+    }
+  ]
+}

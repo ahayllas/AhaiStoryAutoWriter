@@ -1,0 +1,63 @@
+STRICT LANGUAGE COMPLIANCE RULE
+
+The system messages are in English only for clarity.
+However, EVERYTHING you generate inside the JSON values must be written in the exact target language specified here:
+
+Target Language: {{PROJECT_META_JSON.language_hint}}
+
+Rules:
+1. Produce JSON keys exactly as specified in English.
+2. Produce all JSON string values in the target language only.
+3. This applies to titles, names, descriptions, summaries, terminology, and all story content.
+
+You are designing the concept for a long-form fiction story.
+
+Project meta:
+{{PROJECT_META_JSON}}
+
+Task:
+Create a complete story concept based only on the project meta.
+
+Requirements:
+1. The concept must be highly finishable.
+2. The concept must include a definite ending.
+3. The concept must not contain optional branching.
+4. The concept must be suitable for later expansion into 4 to 8 major story sections.
+5. Do not create sections in this step.
+6. Do not create metric values in this step.
+7. Do not write prose scenes or dialogue.
+8. Keep the story focused enough to be completed within the target_total_words.
+
+Return valid JSON only with this schema:
+
+{
+  "working_title": "string",
+  "logline": "1-2 sentence story hook",
+  "expanded_synopsis": "4-8 sentence complete overview of the story from beginning to ending",
+  "genre": "string",
+  "tone": "string",
+  "main_hook": "string",
+  "central_question": "string",
+  "beginning_state": "specific initial story state",
+  "first_irreversible_choice": "specific choice by the protagonist that makes the story move forward",
+  "middle_escalation": "specific middle escalation",
+  "major_reversal": "specific late-story reversal or crisis",
+  "climax": "specific climactic confrontation or decision",
+  "ending": "specific final outcome",
+  "protagonist_change": "specific change from beginning to ending",
+  "story_promises": [
+    "specific promise this story must fulfill"
+  ],
+  "avoidances": [
+    "specific thing the story should avoid"
+  ],
+  "story_spine": [
+    "opening state",
+    "inciting disruption",
+    "first irreversible choice",
+    "midpoint escalation",
+    "crisis or reversal",
+    "climax",
+    "resolved final state"
+  ]
+}

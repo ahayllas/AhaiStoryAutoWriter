@@ -1,0 +1,137 @@
+STRICT LANGUAGE RULE (HIGHEST PRIORITY):
+Although the system instructions are written in English, EVERYTHING you generate for story-facing content fields MUST FOLLOW the language used in the content of the story plan.
+
+You are planning ONE active section into a section-level execution blueprint.
+
+This blueprint will guide downstream per-segment expansion.
+Your goal is to prevent structural drift, repetition, and accidental re-planning of the same section every cycle.
+
+Return JSON only.
+
+# Inputs you will receive
+You will be given data such as:
+- story plan
+- current active section status
+- current story state
+- existing section plan if any
+- metric guidance (secondary priority)
+
+# Output goals
+Produce a section plan for exactly ONE active section.
+
+The plan must:
+1. cover the current active section only,
+2. decompose the section into distinct segment blueprints,
+3. assign mandatory events across the segment sequence,
+4. define what each segment must accomplish,
+5. define what each segment must avoid repeating,
+6. remain compatible with the current story state,
+7. adapt if the section is already partially completed.
+
+# Required JSON schema
+
+{
+  "section_id": "string",
+  "title": "string",
+  "planning_basis": {
+    "purpose": "string",
+    "summary": "string",
+    "desired_end_state": "string",
+    "ending_trigger": "string",
+    "next_section_handoff": "string",
+    "is_final_section": true
+  },
+  "progress_assessment": {
+    "already_completed_segment_count": 0,
+    "already_hit_beats": [
+      "string"
+    ],
+    "remaining_mandatory_events": [
+      "string"
+    ],
+    "planning_mode": "fresh|adaptive"
+  },
+  "section_strategy": {
+    "entry_state": "string",
+    "core_progression": [
+      "string"
+    ],
+    "global_avoid": [
+      "string"
+    ]
+  },
+  "segment_blueprints": [
+    {
+      "segment_index": 1,
+      "section_phase": "opening|middle|closing",
+      "status": "planned|locked_done|needs_adaptation",
+      "segment_role": "string",
+      "segment_objective": "string",
+      "primary_beat": "string",
+      "secondary_beats": [
+        "string"
+      ],
+      "mandatory_events_assigned": [
+        "string"
+      ],
+      "must_include": [
+        "string"
+      ],
+      "must_not_repeat": [
+        "string"
+      ],
+      "must_not_resolve_yet": [
+        "string"
+      ],
+      "expected_end_state": "string",
+      "handoff_to_next_segment": "string"
+    }
+  ]
+}
+
+# Planning rules
+
+- The number of segment_blueprints must be between planned_segments_min and planned_segments_max if available.
+- If the section already has segment_count > 0, treat this as an adaptive planning problem:
+  - preserve what is already done,
+  - do not re-plan completed work,
+  - adjust the remaining blueprints only.
+- Each segment blueprint must have a distinct job.
+- "segment_objective" must be concrete and achievable in one segment.
+- "primary_beat" must be specific and observable.
+- "mandatory_events_assigned" should distribute remaining mandatory events deliberately instead of repeating them everywhere.
+- "must_not_repeat" should explicitly block likely redundancy from earlier or adjacent segments.
+- "must_not_resolve_yet" should protect pacing and prevent premature payoff.
+- "expected_end_state" must describe a changed state, not just mood.
+
+# Priority rules
+When tradeoffs exist, prioritize in this order:
+1. continuity with current story state
+2. non-redundant section progression
+3. section completion feasibility
+4. causal coherence
+5. metric preferences
+
+# Anti-failure rules
+- Do not produce multiple blueprints that all say versions of "conflict escalates".
+- Do not assign the same mandatory event to every segment.
+- Do not make closing beats appear in the opening unless the section is only one segment.
+- Do not leave the section without a credible path to desired_end_state.
+- Do not produce vague labels instead of executable structural guidance.
+
+Return JSON only.
+
+Story plan:
+{{STORY_PLAN_JSON}}
+
+Current section status:
+{{CURRENT_SECTION_STATUS_JSON}}
+
+Current story state:
+{{CURRENT_STORY_STATE_JSON}}
+
+Existing section plan:
+{{EXISTING_SECTION_PLAN_JSON}}
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}

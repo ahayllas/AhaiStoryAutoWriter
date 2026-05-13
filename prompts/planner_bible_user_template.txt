@@ -1,0 +1,140 @@
+STRICT LANGUAGE COMPLIANCE RULE
+
+The system messages are in English only for clarity.
+However, EVERYTHING you generate inside the JSON values must be written in the exact target language specified here:
+
+Target Language: {{PROJECT_META_JSON.language_hint}}
+
+Rules:
+1. Produce JSON keys exactly as specified in English.
+2. Produce all JSON string values in the target language only.
+3. This applies to titles, names, descriptions, summaries, terminology, and all story content.
+
+Project meta:
+{{PROJECT_META_JSON}}
+
+Story concept:
+{{STORY_CONCEPT_JSON}}
+
+Task:
+Create a story bible for downstream section planning.
+
+Requirements:
+- The bible must be consistent with the concept.
+- The protagonist must have a concrete external goal and a concrete internal need.
+- Important characters must have story functions, goals, and pressures.
+- The ending overview must be definite and compatible with the concept ending.
+- Include enough constraints for later planners to avoid continuity drift.
+- Include timeline assumptions at a high level, but do not create section time windows yet.
+
+Return valid JSON only with this schema:
+
+{
+  "title": "string",
+  "premise": "string",
+  "target_total_words": 12000,
+  "genre": "string",
+  "tone": "string",
+  "setting": {
+    "time": "string",
+    "place": "string",
+    "world_rules": [
+      "specific rule or constraint of the story world"
+    ]
+  },
+  "timeline_assumptions": {
+    "total_story_duration_estimate": "for example: about three weeks",
+    "time_scale": "day-based relative timeline from story day 0",
+    "important_time_constraints": [
+      "specific time constraint"
+    ]
+  },
+  "protagonist": {
+    "name": "string",
+    "role": "string",
+    "goal": "string",
+    "inner_need": "string",
+    "starting_flaw_or_limitation": "string",
+    "false_belief": "string",
+    "final_state": "string"
+  },
+  "major_characters": [
+    {
+      "name": "string",
+      "role": "string",
+      "relationship_to_protagonist": "string",
+      "goal": "string",
+      "pressure_or_secret": "string",
+      "story_function": "string",
+      "arc": "string",
+      "final_state": "string"
+    }
+  ],
+  "core_conflict": {
+    "external": "string",
+    "internal": "string",
+    "stakes": "string"
+  },
+  "antagonistic_forces": [
+    {
+      "name_or_label": "string",
+      "type": "person, institution, environment, inner flaw, mystery, or other",
+      "method_of_pressure": "string",
+      "defeat_or_resolution": "string"
+    }
+  ],
+  "relationship_arcs": [
+    {
+      "characters": [
+        "character name",
+        "character name"
+      ],
+      "starting_dynamic": "string",
+      "turning_points": [
+        "specific turning point"
+      ],
+      "ending_dynamic": "string"
+    }
+  ],
+  "key_objects_or_locations": [
+    {
+      "name": "string",
+      "function": "string",
+      "first_use": "string",
+      "final_use_or_resolution": "string"
+    }
+  ],
+  "ending_overview": {
+    "final_outcome": "string",
+    "emotional_resolution": "string",
+    "what_is_resolved": [
+      "specific resolved conflict, question, relationship, or threat"
+    ]
+  },
+  "story_spine": [
+    "opening state",
+    "inciting disruption",
+    "first irreversible choice",
+    "midpoint escalation",
+    "crisis or reversal",
+    "climax",
+    "resolved final state"
+  ],
+  "global_constraints": {
+    "must_happen": [
+      "specific event, reveal, decision, or consequence that must happen"
+    ],
+    "must_not_happen": [
+      "specific event, reveal, shortcut, contradiction, or tonal break that must not happen"
+    ],
+    "continuity_facts": [
+      "specific fact that remains true unless explicitly changed"
+    ],
+    "reveal_constraints": [
+      "specific reveal timing or information-control rule"
+    ],
+    "time_continuity_rules": [
+      "specific rule about how time should pass in the story"
+    ]
+  }
+}

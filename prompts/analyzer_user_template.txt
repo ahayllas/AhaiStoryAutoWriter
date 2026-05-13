@@ -1,0 +1,31 @@
+Current segment plan:
+{{CURRENT_SEGMENT_PLAN_JSON}}
+
+Current story state:
+{{CURRENT_STORY_STATE_JSON}}
+
+Current fact brief:
+{{CURRENT_FACT_BRIEF_JSON}}
+
+Reveal guard package:
+{{REVEAL_GUARD_PACKAGE_JSON}}
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}
+
+Return JSON:
+{
+  "segment_id": "...",
+  "section_id": "...",
+  "situational_summary": "...",
+  "pressure_map": [],
+  "active_conflicts": [],
+  "allowed_movements": [],
+  "forbidden_movements": [],
+  "reveal_boundary_notes": [],
+  "metric_interpretation": {},
+  "writer_focus": []
+}
+
+Do not write story prose.
+Output JSON only.

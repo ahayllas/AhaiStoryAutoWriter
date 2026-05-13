@@ -1,0 +1,138 @@
+{
+  "version": "metric_schema_v1",
+  "metrics": {
+    "tension": {
+      "description": "Narrative pressure and instability level.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 12,
+        "max_down": 10
+      }
+    },
+    "mystery": {
+      "description": "Degree of unresolved unknowns and withheld comprehension.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 10,
+        "max_down": 12
+      }
+    },
+    "emotional_heat": {
+      "description": "Intensity and visibility of emotional charge.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 14,
+        "max_down": 14
+      }
+    },
+    "relationship_strain": {
+      "description": "Interpersonal friction, distance, and pressure.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 10,
+        "max_down": 10
+      }
+    },
+    "information_release": {
+      "description": "How much explicit new information may be confirmed in this segment.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 18,
+        "max_down": 18
+      }
+    },
+    "pace": {
+      "description": "Forward motion and event density.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 15,
+        "max_down": 15
+      }
+    },
+    "threat_salience": {
+      "description": "Perceived prominence of danger, harm, or risk.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 12,
+        "max_down": 12
+      }
+    },
+    "hope": {
+      "description": "Perceived possibility of relief, connection, success, or repair.",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 10,
+        "max_down": 12
+      }
+    }
+  },
+  "cross_metric_rules": [
+    {
+      "rule_id": "info_release_vs_mystery_gap",
+      "description": "High information release should not coexist with very high mystery without explanation.",
+      "rule_type": "max_gap",
+      "params": {
+        "metric_a": "information_release",
+        "metric_b": "mystery",
+        "max_abs_diff": 55
+      }
+    },
+    {
+      "rule_id": "threat_caps_hope",
+      "description": "When threat is very high, hope should usually not exceed it by a large margin.",
+      "rule_type": "conditional_cap",
+      "params": {
+        "if_metric": "threat_salience",
+        "if_gte": 70,
+        "target_metric": "hope",
+        "max_value": 65
+      }
+    },
+    {
+      "rule_id": "tension_and_pace_alignment",
+      "description": "Extremely high pace with very low tension is usually suspicious.",
+      "rule_type": "min_dependency",
+      "params": {
+        "if_metric": "pace",
+        "if_gte": 75,
+        "target_metric": "tension",
+        "target_min": 35
+      }
+    },
+    {
+      "rule_id": "emotional_heat_vs_relationship_strain",
+      "description": "Relationship strain should not be near zero when emotional heat is very high in interpersonal scenes unless explicitly intended.",
+      "rule_type": "soft_dependency",
+      "params": {
+        "if_metric": "emotional_heat",
+        "if_gte": 75,
+        "target_metric": "relationship_strain",
+        "target_min": 20
+      }
+    }
+  ]
+}

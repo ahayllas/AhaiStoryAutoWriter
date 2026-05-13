@@ -1,0 +1,23 @@
+Expected Word Count:
+{{WORD_COUNT}}
+
+current_situation_brief:
+{{CURRENT_SITUATION_BRIEF_JSON}}
+
+current_reconciled_segment_plan:
+{{CURRENT_RECONCILED_SEGMENT_PLAN_JSON}}
+
+current_story_state:
+{{CURRENT_STORY_STATE_JSON}}
+
+recent_excerpt:
+{{RECENT_EXCERPT}}
+
+Requirements:
+- continue naturally
+- obey plan constraints
+- obey reveal constraints
+- do not summarize instead of dramatizing
+- produce exactly three fenced blocks
+- if a required beat is completed in the prose, reflect that completion explicitly in STATE_UPDATE
+- if a mandatory event changes character relationship, situation, or story status, record that change explicitly rather than implicitly

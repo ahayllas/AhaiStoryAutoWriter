@@ -1,0 +1,136 @@
+STRICT LANGUAGE COMPLIANCE RULE
+
+The system messages are in English only to give clear instructions.
+However, EVERYTHING you generate for the story MUST be written in the exact language specified below:
+
+Target Language is stated at PROJECT_META_JSON "language_hint" at below
+
+Rules:
+1. Produce the entire output in the target language ONLY.
+2. This applies to all text: narration, dialogue, thoughts, descriptions, and terminology.
+
+
+
+You are designing a long-form fiction story plan for downstream staged generation.
+
+Your task is to produce a COMPLETE story plan in JSON only.
+
+The story plan must be section-oriented, because a runtime controller will generate the story one section at a time and decide completion based on section progress.
+
+# Primary objective
+Create a story structure that is highly finishable.
+Do NOT optimize for literary experimentation.
+Do NOT create a vague outline.
+Do NOT leave the ending unspecified.
+
+# Hard requirements
+1. Output valid JSON only.
+2. The top-level object must contain:
+   - "title"
+   - "premise"
+   - "target_total_words"
+   - "genre"
+   - "tone"
+   - "setting"
+   - "protagonist"
+   - "core_conflict"
+   - "ending_overview"
+   - "sections"
+3. "sections" must be a list with 4 to 8 sections.
+4. Every section must be concrete, causally necessary, and sequential.
+5. The final section must clearly resolve the main story conflict.
+6. Every section must include enough information for a runtime generator to know:
+   - what this section is trying to do
+   - what must happen before the section can be considered complete
+   - what changed by the end of the section
+7. Avoid filler sections.
+8. Avoid optional branching.
+9. Do not use placeholders like "to be decided later".
+
+# Required JSON schema
+
+{
+  "title": "string",
+  "premise": "string",
+  "target_total_words": 12000,
+  "genre": "string",
+  "tone": "string",
+  "setting": {
+    "time": "string",
+    "place": "string",
+    "world_rules": [
+      "string"
+    ]
+  },
+  "protagonist": {
+    "name": "string",
+    "role": "string",
+    "goal": "string",
+    "inner_need": "string",
+    "starting_flaw_or_limitation": "string"
+  },
+  "core_conflict": {
+    "external": "string",
+    "internal": "string",
+    "stakes": "string"
+  },
+  "ending_overview": {
+    "final_outcome": "string",
+    "emotional_resolution": "string",
+    "what_is_resolved": [
+      "string"
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "sec_01",
+      "title": "string",
+      "purpose": "string",
+      "summary": "2-4 sentence summary of what happens in this section",
+      "planned_segments_min": 1,
+      "planned_segments_max": 3,
+      "mandatory_events": [
+        "specific event or beat that must occur",
+        "specific event or beat that must occur"
+      ],
+      "desired_end_state": "what must be true by the end of this section",
+      "ending_trigger": "a concrete signal that this section is ready to end",
+      "next_section_handoff": "what momentum, problem, revelation, or decision carries into the next section"
+    }
+  ]
+}
+
+# Section design rules
+For each section:
+- "purpose" must describe the dramatic function of the section.
+- "summary" must describe actual events, not thematic commentary.
+- "mandatory_events" must be specific and observable.
+- "desired_end_state" must describe a changed story state, not a vague mood.
+- "ending_trigger" must be concrete enough that a runtime system can infer closure.
+- "next_section_handoff" must create a natural bridge to the next section.
+- "planned_segments_min" and "planned_segments_max" should usually be between 1 and 3.
+- Keep sections balanced. Do not put the whole story into one section.
+
+# Story quality rules
+- The protagonist must make meaningful decisions.
+- Escalation must be visible across sections.
+- New complications should arise from previous actions where possible.
+- The ending must feel earned by prior setup.
+- The final section must contain both climax and resolution, unless the story is intentionally tragic, in which case the resolution may be bleak but still definite.
+
+# Anti-failure rules
+- Do not create a final section that is only epilogue with no climax.
+- Do not create middle sections that merely repeat the same conflict.
+- Do not create mandatory_events that are too abstract, such as "character grows" or "tension increases".
+- Do not create desired_end_state values that are impossible to observe.
+- Do not leave the main antagonist, mystery, or central dilemma unresolved unless the premise explicitly requires an ambiguous ending.
+
+Return JSON only.
+
+Project meta:
+{{PROJECT_META_JSON}}
+
+AGAIN, PLEASE FOLLOW THE "language_hint" AND FOLLOW THE STRICT LANGUAGE COMPLIANCE RULE
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}
