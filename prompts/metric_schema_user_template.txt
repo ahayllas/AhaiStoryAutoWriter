@@ -1,0 +1,48 @@
+Story plan:
+{{STORY_PLAN_JSON}}
+
+Seed metric schema:
+{{SEED_METRIC_SCHEMA_JSON}}
+
+Task:
+Refine the metric schema for this story.
+
+Requirements:
+1. Keep the schema simple enough for automated validation.
+2. Prefer 6 to 10 metrics total.
+3. Metrics must be useful for controlling section-to-section pacing, escalation, psychology, relationship pressure, mystery, risk, or thematic progression.
+4. Do not create duplicate metrics.
+5. Do not make metrics too abstract to score.
+6. Every metric must use range 0 to 100.
+7. Every metric must include default_step.max_up and default_step.max_down.
+8. monotonic_bias may be "rising", "falling", or null.
+9. Return valid JSON only.
+
+Return this schema:
+
+{
+  "version": "v1",
+  "metrics": {
+    "metric_name": {
+      "name": "metric_name",
+      "description": "clear description in story language",
+      "allowed_range": {
+        "min_value": 0,
+        "max_value": 100
+      },
+      "default_step": {
+        "max_up": 20,
+        "max_down": 15
+      },
+      "monotonic_bias": "rising or falling or null"
+    }
+  },
+  "cross_metric_rules": [
+    {
+      "rule_id": "string",
+      "description": "string",
+      "rule_type": "string",
+      "params": {}
+    }
+  ]
+}

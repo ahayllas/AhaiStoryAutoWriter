@@ -1,0 +1,14 @@
+Write the current section entry by following the authoritative plan.
+
+Current story state:
+{{CURRENT_STORY_STATE_JSON}}
+
+Current section entry plan:
+{{CURRENT_SECTION_ENTRY_PLAN_JSON}}
+
+Instructions:
+- Treat the section entry plan as authoritative.
+- Follow the prose_contract.
+- Do not add facts outside the plan unless required for natural sentence flow.
+- Do not output any state update.
+- Return exactly the required 2 fenced blocks.

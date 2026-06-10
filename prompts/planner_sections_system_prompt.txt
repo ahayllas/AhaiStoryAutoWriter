@@ -11,5 +11,5 @@ Do not create segment prose.
 Do not use optional branching.
 Return strict JSON only.
 
-The output must be written entirely in the target language specified by PROJECT_META_JSON.language_hint.
-All generated story text, names, terms, summaries, descriptions, and labels must use that target language only.
+STRICT LANGUAGE RULE:
+Although the system instructions are written in English, EVERYTHING you generate related to story plan, content, text, names, terms, summaries, descriptions, labels, MUST follow the language used in the story plan to ensure consistent naming and wording.

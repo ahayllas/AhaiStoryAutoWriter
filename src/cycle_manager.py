@@ -10,7 +10,9 @@ from section_planner import SectionPlanner
 from situation_analyzer import SituationAnalyzer
 from state_manager import StateManager
 from segment_writer import SegmentWriter
-
+from section_entry_planner import SectionEntryPlanner
+from section_entry_writer import SectionEntryWriter
+from section_proofreader import SectionProofreader
 
 class CycleManager:
     """
@@ -32,6 +34,9 @@ class CycleManager:
         situation_analyzer: SituationAnalyzer,
         state_manager: StateManager,
         writer: SegmentWriter,
+        section_entry_planner: SectionEntryPlanner,
+        section_entry_writer: SectionEntryWriter,
+        section_proofreader: SectionProofreader | None = None,
     ) -> None:
         self.queue_manager = queue_manager
         self.section_expander = section_expander
@@ -39,6 +44,9 @@ class CycleManager:
         self.state_manager = state_manager
         self.writer = writer
         self.section_planner = SectionPlanner()
+        self.section_entry_planner = section_entry_planner
+        self.section_entry_writer = section_entry_writer
+        self.section_proofreader = section_proofreader
 
     def run_cycle(self, metric_schema: dict[str, Any]) -> dict[str, Any]:
         project_meta = load_json(PROJECT_META_PATH, {})
@@ -74,6 +82,18 @@ class CycleManager:
                 "project_status": load_json(PROJECT_STATUS_PATH, {}),
             }
 
+        section_entry_result = self._run_section_entry_if_needed(metric_schema=metric_schema)
+        if section_entry_result is not None:
+            return {
+                "status": "ok",
+                "reason": "section entry completed",
+                "section_entry_result": section_entry_result,
+                "section_status": load_json(CURRENT_SECTION_STATUS_PATH, {}),
+                "project_status": load_json(PROJECT_STATUS_PATH, {}),
+            }
+            
+        section_proofreading_result = None
+            
         queue_item = self._get_or_create_queue_item()
         if not queue_item:
             next_section = self.section_planner.advance_if_complete()
@@ -95,6 +115,10 @@ class CycleManager:
                     "reason": "failed to create next section plan",
                     "project_status": load_json(PROJECT_STATUS_PATH, {}),
                 }
+
+            next_entry_result = self._run_section_entry_if_needed(metric_schema=metric_schema)
+            if next_entry_result is not None:
+                section_entry_result = next_entry_result
 
             queue_item = self._get_or_create_queue_item()
             if not queue_item:
@@ -123,10 +147,15 @@ class CycleManager:
         )
 
         if section_status and section_status.get("section_complete"):
+            if self.section_proofreader is not None:
+                section_proofreading_result = self.section_proofreader.run_if_needed(
+                    section_id=section_status.get("section_id")
+                )
+
             next_section = self.section_planner.advance_if_complete()
             if next_section is None:
                 self._mark_project_completed(reason="final section completed")
-
+                
         current_words = self._safe_int(write_result.get("current_words"), default=0)
         target_total_words = self._safe_int(project_meta.get("target_total_words"), default=0)
 
@@ -144,6 +173,8 @@ class CycleManager:
         final_status = load_json(PROJECT_STATUS_PATH, {})
         return {
             "status": "completed" if final_status.get("completed") else "ok",
+            "section_entry_result": section_entry_result,
+            "section_proofreading_result": section_proofreading_result,
             "queue_item": queue_item,
             "segment_plan": segment_plan,
             "situation_brief": situation_brief,
@@ -179,6 +210,40 @@ class CycleManager:
             return
 
         self.queue_manager.mark_item_completed(queue_item, write_result)
+        
+        
+    def _run_section_entry_if_needed(self, metric_schema: dict[str, Any]) -> dict[str, Any] | None:
+        section_status = load_json(CURRENT_SECTION_STATUS_PATH, {})
+        if not section_status:
+            return None
+
+        if section_status.get("section_complete"):
+            return None
+
+        # 若已完成 entry，就不重跑
+        if section_status.get("section_entry_completed"):
+            return None
+
+        planner_result = self.section_entry_planner.run(metric_schema=metric_schema)
+        writer_result = self.section_entry_writer.run()
+
+        refreshed_status = load_json(CURRENT_SECTION_STATUS_PATH, {})
+        refreshed_status["section_entry_completed"] = True
+        refreshed_status["section_entry_required"] = False
+        refreshed_status["section_entry_state_owner"] = "section_entry_planner"
+        refreshed_status["section_entry_writer_ran"] = True
+        refreshed_status["section_entry_id"] = (
+            planner_result.get("entry_id")
+            or writer_result.get("entry_id")
+            or f"{refreshed_status.get('section_id', 'unknown_section')}__entry"
+        )
+        save_json(CURRENT_SECTION_STATUS_PATH, refreshed_status)
+
+        return {
+            "planner_result": planner_result,
+            "writer_result": writer_result,
+            "section_status": refreshed_status,
+        }
 
     def _mark_project_completed(self, reason: str) -> None:
         project_status = load_json(PROJECT_STATUS_PATH, {})

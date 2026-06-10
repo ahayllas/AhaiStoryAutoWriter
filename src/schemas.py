@@ -12,10 +12,6 @@ class ProjectMeta:
     language_hint: str
     target_total_words: int
     default_segment_words: int = 2500
-    planner_model: str = "gemma-4"
-    expander_model: str = "gemma-4"
-    analyzer_model: str = "gemma-4"
-    writer_model: str = "gemma-4"
 
 
 @dataclass

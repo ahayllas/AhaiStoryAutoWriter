@@ -1,0 +1,19 @@
+Project meta:
+{{PROJECT_META_JSON}}
+
+Randomly sampled candidate words:
+{{RANDOM_WORD_POOL_JSON}}
+
+Task:
+Select exactly {{SELECT_COUNT}} words from the candidate list that seem most promising as indirect creative inspiration for this project.
+
+Return valid JSON only with this schema:
+
+{
+  "selected_words": [
+    "word"
+  ],
+  "selection_rationale": [
+    "short reason in 1 sentence"
+  ]
+}

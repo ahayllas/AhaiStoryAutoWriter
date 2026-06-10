@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import math
+import random
+from pathlib import Path
+
 from dataclasses import asdict
 from typing import Any
 
 from config import (
     DEFAULT_SEGMENT_WORDS,
     MODEL_PLANNER,
+    MODEL_CREATIVE,
     PLANNER_CONCEPT_SYSTEM_PATH,
     PLANNER_CONCEPT_USER_TEMPLATE_PATH,
     PLANNER_BIBLE_SYSTEM_PATH,
@@ -19,6 +23,15 @@ from config import (
     STORY_BIBLE_PATH,
     STORY_CONCEPT_PATH,
     STORY_PLAN_PATH,
+    CREATIVE_WORDS_PATH,
+    CREATIVE_WORD_SELECTOR_SYSTEM_PATH,
+    CREATIVE_WORD_SELECTOR_USER_TEMPLATE_PATH,
+    CREATIVE_SITUATION_SYSTEM_PATH,
+    CREATIVE_SITUATION_USER_TEMPLATE_PATH,
+    CREATIVE_PACKET_PATH,
+    DEFAULT_CREATIVE_RANDOM_POOL_SIZE,
+    DEFAULT_CREATIVE_SELECTED_WORDS,
+    DEFAULT_CREATIVE_SITUATION_COUNT,
 )
 from io_contract import load_text, save_json
 from schemas import ProjectMeta
@@ -45,14 +58,35 @@ class StoryPlanner:
             system_prompt=system_prompt,
             user_prompt=user_prompt,
         )
+        
+    def _generate_json_from_prompt_creativeModel(
+        self,
+        *,
+        system_path,
+        user_template_path,
+        mapping: dict[str, Any],
+    ) -> dict:
+        system_prompt = load_text(system_path)
+        user_template = load_text(user_template_path)
+        user_prompt = fill_template(user_template, mapping)
+
+        return self.llm_client.generate_json(
+            model=MODEL_CREATIVE,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+        )    
+        
 
     def run(self, meta: ProjectMeta, metric_schema: dict) -> dict:
         meta_dict = asdict(meta)
 
-        concept = self.generate_concept(meta_dict)
+        creative_packet = self.build_creative_packet(meta_dict)
+        save_json(CREATIVE_PACKET_PATH, creative_packet)
+
+        concept = self.generate_concept(meta_dict, creative_packet)
         save_json(STORY_CONCEPT_PATH, concept)
 
-        bible = self.generate_bible(meta_dict, concept)
+        bible = self.generate_bible(meta_dict, concept, creative_packet)
         save_json(STORY_BIBLE_PATH, bible)
 
         section_draft = self.generate_sections(meta_dict, concept, bible)
@@ -79,22 +113,24 @@ class StoryPlanner:
 
         return plan
 
-    def generate_concept(self, meta_dict: dict) -> dict:
+    def generate_concept(self, meta_dict: dict, creative_packet: dict) -> dict:
         return self._generate_json_from_prompt(
             system_path=PLANNER_CONCEPT_SYSTEM_PATH,
             user_template_path=PLANNER_CONCEPT_USER_TEMPLATE_PATH,
             mapping={
                 "PROJECT_META_JSON": meta_dict,
+                "CREATIVE_PACKET_JSON": creative_packet,
             },
         )
-
-    def generate_bible(self, meta_dict: dict, concept: dict) -> dict:
+        
+    def generate_bible(self, meta_dict: dict, concept: dict, creative_packet: dict) -> dict:
         return self._generate_json_from_prompt(
             system_path=PLANNER_BIBLE_SYSTEM_PATH,
             user_template_path=PLANNER_BIBLE_USER_TEMPLATE_PATH,
             mapping={
                 "PROJECT_META_JSON": meta_dict,
                 "STORY_CONCEPT_JSON": concept,
+                "CREATIVE_PACKET_JSON": creative_packet,
             },
         )
 
@@ -350,3 +386,135 @@ class StoryPlanner:
             return int(value)
         except Exception:
             return default
+            
+            
+    def build_creative_packet(self, meta_dict: dict) -> dict:
+        random_pool = self.sample_random_words(
+            word_file=CREATIVE_WORDS_PATH,
+            sample_size=DEFAULT_CREATIVE_RANDOM_POOL_SIZE,
+        )
+
+        if not random_pool:
+            return {
+                "enabled": False,
+                "random_words_pool": [],
+                "selected_words": [],
+                "selection_rationale": [],
+                "everyday_situations": [],
+                "usage_note": "Creative divergence disabled because no word list could be loaded.",
+            }
+
+        deduped_selected = []
+        # keep only words from the random pool
+        pool_set = {w.strip() for w in random_pool}
+        
+        if DEFAULT_CREATIVE_RANDOM_POOL_SIZE > DEFAULT_CREATIVE_SELECTED_WORDS :
+            selected_payload = self._generate_json_from_prompt_creativeModel(
+                system_path=CREATIVE_WORD_SELECTOR_SYSTEM_PATH,
+                user_template_path=CREATIVE_WORD_SELECTOR_USER_TEMPLATE_PATH,
+                mapping={
+                    "PROJECT_META_JSON": meta_dict,
+                    "RANDOM_WORD_POOL_JSON": random_pool,
+                    "SELECT_COUNT": DEFAULT_CREATIVE_SELECTED_WORDS,
+                },
+            )
+
+            selected_words = selected_payload.get("selected_words", [])
+            if not isinstance(selected_words, list):
+                selected_words = []
+
+            selected_words = [
+                str(x).strip() for x in selected_words
+                if isinstance(x, str) and str(x).strip()
+            ]
+
+            seen = set()
+            for word in selected_words:
+                if word in pool_set and word not in seen:
+                    deduped_selected.append(word)
+                    seen.add(word)
+
+            if len(deduped_selected) > DEFAULT_CREATIVE_SELECTED_WORDS:
+                deduped_selected = deduped_selected[:DEFAULT_CREATIVE_SELECTED_WORDS]
+                
+            if len(deduped_selected) < DEFAULT_CREATIVE_SELECTED_WORDS:
+                for word in random_pool:
+                    if word not in seen:
+                        deduped_selected.append(word)
+                        seen.add(word)
+                    if len(deduped_selected) >= DEFAULT_CREATIVE_SELECTED_WORDS:
+                        break
+        else :
+            deduped_selected.extend(pool_set)
+
+
+        situation_payload = self._generate_json_from_prompt_creativeModel(
+            system_path=CREATIVE_SITUATION_SYSTEM_PATH,
+            user_template_path=CREATIVE_SITUATION_USER_TEMPLATE_PATH,
+            mapping={
+                "SELECTED_WORDS_JSON": deduped_selected,
+                "SITUATION_COUNT": DEFAULT_CREATIVE_SITUATION_COUNT,
+            },
+        )
+
+        everyday_situations = situation_payload.get("everyday_situations", [])
+        if not isinstance(everyday_situations, list):
+            everyday_situations = []
+
+        if len(everyday_situations) < DEFAULT_CREATIVE_SITUATION_COUNT:
+            fallback_sentences = [
+                f"Someone has to deal with {word} during an ordinary but mildly inconvenient part of the day."
+                for word in deduped_selected[:DEFAULT_CREATIVE_SITUATION_COUNT]
+            ]
+            for sentence in fallback_sentences:
+                if len(everyday_situations) >= DEFAULT_CREATIVE_SITUATION_COUNT:
+                    break
+                everyday_situations.append(sentence)
+
+        everyday_situations = [
+            str(x).strip() for x in everyday_situations
+            if isinstance(x, str) and str(x).strip()
+        ]
+
+        return {
+            "enabled": True,
+            #"random_words_pool": random_pool,
+            #"selected_words": deduped_selected,
+            "everyday_situations": everyday_situations,
+            #"guidance": (
+            #    "Use this packet only as soft inspiration. "
+            #    "Do not force literal inclusion of any word or situation. "
+            #    "Prefer subtle transformation into mood, objects, habits, pressures, "
+            #   "misunderstandings, or scene texture."
+            #),
+        }
+
+    def sample_random_words(self, *, word_file: Path, sample_size: int) -> list[str]:
+        try:
+            text = load_text(word_file, "")
+        except Exception:
+            text = ""
+
+        words = [
+            line.strip()
+            for line in text.splitlines()
+            if line.strip()
+        ]
+
+        # dedupe while preserving order
+        deduped = []
+        seen = set()
+        for word in words:
+            if word not in seen:
+                deduped.append(word)
+                seen.add(word)
+
+        if not deduped:
+            return []
+
+        if sample_size >= len(deduped):
+            shuffled = deduped[:]
+            random.shuffle(shuffled)
+            return shuffled
+
+        return random.sample(deduped, sample_size)

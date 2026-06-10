@@ -1,0 +1,49 @@
+Story plan:
+{{STORY_PLAN_JSON}}
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}
+
+Task:
+Assign a metric envelope to every section in the story plan.
+
+Important:
+A metric envelope is not an exact value.
+It is an allowed range for section expansion and segment generation.
+
+Requirements:
+1. Every section must receive one metric_envelope.
+2. Use exactly the existing section_id values.
+3. Use exactly the metric names from METRIC_SCHEMA_JSON.metrics.
+4. Every metric value must be an integer from 0 to 100.
+5. metric_min <= metric_expected_center <= metric_max.
+6. Avoid sudden impossible jumps between adjacent sections.
+7. Respect section_role, time_window, summary, state_changes, and desired_end_state.
+8. If a section is a climax or crisis, tension and emotional cost should usually be higher.
+9. If the story has causal/time instability, causal-related metrics should rise gradually, not suddenly.
+10. Do not change section content.
+11. Return valid JSON only.
+
+Return this schema:
+
+{
+  "section_metric_envelopes": [
+    {
+      "section_id": "sec_01",
+      "label": "section title",
+      "metric_min": {
+        "metric_name": 0
+      },
+      "metric_max": {
+        "metric_name": 100
+      },
+      "metric_expected_center": {
+        "metric_name": 50
+      },
+      "notes": "short rationale"
+    }
+  ],
+  "assignment_notes": [
+    "general note"
+  ]
+}

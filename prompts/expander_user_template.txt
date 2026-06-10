@@ -1,5 +1,6 @@
-STRICT LANGUAGE RULE (HIGHEST PRIORITY): 
-Although the system instructions are written in English, EVERYTHING you generate for the story — including all narrative, dialogue, thoughts, descriptions, and terminology — MUST FOLLOW the language used in the content of the story plan.
+STRICT LANGUAGE RULE:
+Although the system instructions are written in English, EVERYTHING you generate related to story plan, content, text, names, terms, summaries, descriptions, labels, MUST follow the language used in the story plan to ensure consistent naming and wording.
+
 
 You are expanding one active story segment into a concrete writing plan.
 
@@ -16,15 +17,15 @@ Your job is to produce a single-segment plan that:
 
 Return JSON only.
 
-# Inputs you will receive
-You will be given data such as:
-- story plan
-- current active section status
+# Inputs you will receive at least
+- story_context (minimal story information: protagonist, tone, genre, setting)
+- current section status
 - current section plan
 - target segment blueprint
-- current queue item
+- queue item
 - current story state
-- metric guidance (may be noisy; do not over-prioritize it)
+- metric schema
+
 
 # Output goals
 Produce a plan for exactly ONE segment.
@@ -123,8 +124,8 @@ The segment should:
 
 Return JSON only.
 
-Story plan:
-{{STORY_PLAN_JSON}}
+Story context:
+{{STORY_CONTEXT_JSON}}
 
 Current section status:
 {{CURRENT_SECTION_STATUS_JSON}}

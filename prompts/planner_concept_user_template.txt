@@ -15,6 +15,35 @@ You are designing the concept for a long-form fiction story.
 Project meta:
 {{PROJECT_META_JSON}}
 
+Creative inspiration packet:
+{{CREATIVE_PACKET_JSON}}
+
+You MUST treat the creative inspirations as binding design constraints.
+
+Before generating the story concept, infer from the inspirations:
+- recurring motifs
+- emotional texture
+- relationship dynamics
+- conflict patterns
+- atmosphere cues
+- ending tendencies
+- taboo or anti-pattern signals
+
+Then use those inferred signals to shape the actual story architecture.
+
+Hard compliance rules:
+1. Do not generate a generic story first and explain inspirations afterward.
+2. The inspirations must materially alter the plot, not just the wording.
+3. At least 4 major fields in the output must be directly shaped by the inspirations:
+   - central_question
+   - first_irreversible_choice
+   - middle_escalation
+   - major_reversal
+   - climax
+   - ending
+4. If a listed inspiration does not affect the story design, omit that interpretation and redesign.
+5. The "inspiration" field must explain concrete design influence, not thematic resemblance only.
+
 Task:
 Create a complete story concept based only on the project meta.
 
@@ -59,5 +88,8 @@ Return valid JSON only with this schema:
     "crisis or reversal",
     "climax",
     "resolved final state"
+  ],
+  "inspiration": [
+    "Explain how you respect the mentioned creative inspirations"
   ]
 }

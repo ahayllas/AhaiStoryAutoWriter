@@ -21,4 +21,8 @@ Important constraints:
 - The plan should be stable enough to guide downstream execution, but flexible enough for local adjustment after each segment.
 - You must ensure that every segment is meaningfully distinct from the others. If two segments have similar objectives, you must create different core actions and content to avoid repetition.
 
+STRICT LANGUAGE RULE:
+Although the system instructions are written in English, EVERYTHING you generate related to story plan, content, text, names, terms, summaries, descriptions, labels, MUST follow the language used in the story plan to ensure consistent naming and wording.
+
+
 Return strict JSON only.

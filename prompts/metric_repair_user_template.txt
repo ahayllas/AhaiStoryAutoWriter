@@ -1,0 +1,132 @@
+Compact repair context:
+{{STORY_PLAN_JSON}}
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}
+
+Metric analysis slice for the focused transition:
+{{METRIC_ANALYSIS_JSON}}
+
+Task:
+Suggest conservative repairs for the focused transition only.
+
+The compact repair context contains:
+1. global_context: shortened whole-story context.
+2. all_section_summaries: summaries and metric centers for all sections.
+3. focused_transition: the transition being repaired.
+4. focused_sections_full: full section data only for nearby sections.
+5. relevant_bridges: existing bridge facts near the focused transition.
+
+Requirements:
+1. Do not rewrite the whole story.
+2. Only repair the focused transition unless a neighboring section is directly necessary.
+3. Preserve all existing section_ids unless suggesting an inserted section.
+4. Prefer bridge facts if a time jump explains emotional, relationship, skill, knowledge, reputation, or danger changes.
+5. Prefer adjusting section events if a section needs a stronger causal handoff.
+6. Prefer adjusting metric envelopes if the number is simply too high or too low.
+7. Suggest inserting a section only when a transition cannot be repaired by bridge facts or event adjustments.
+8. If you insert a section into an existing transition A -> B, also provide split bridge facts for A -> inserted_section and inserted_section -> B whenever continuity information is needed.
+9. Do not assume the original A -> B bridge will remain valid after insertion.
+10. Any inserted section must have a time_window with integer day values.
+11. Any bridge fact must have start_day and end_day.
+12. Do not add metrics not present in the schema.
+13. Return valid JSON only.
+
+Return this schema:
+
+{
+  "repair_needed": true,
+  "repair_summary": "short summary",
+  "suggestions": [
+    {
+      "type": "insert_section | add_bridge_facts | adjust_section_events | adjust_metric_envelopes",
+      "priority": "low | medium | high",
+      "reason": "string"
+    }
+  ],
+  "insert_sections": [
+    {
+      "insert_after_section_id": "sec_02",
+      "section": {
+        "section_id": "sec_02b",
+        "title": "string",
+        "section_role": "string",
+        "narrative_weight": 1.0,
+        "purpose": "string",
+        "entry_state": "string",
+        "time_window": {
+          "start_day": 0,
+          "end_day": 0,
+          "label": "string",
+          "duration_summary": "string",
+          "time_skip_from_previous": "string",
+          "time_continuity_notes": "string"
+        },
+        "summary": "string",
+        "causality_from_previous": "string",
+        "protagonist_decision": "string",
+        "mandatory_events": [
+          "string"
+        ],
+        "new_facts_established": [
+          "string"
+        ],
+        "state_changes": [
+          "string"
+        ],
+        "desired_end_state": "string",
+        "ending_trigger": "string",
+        "next_section_handoff": "string",
+        "planned_segments_min": 1,
+        "planned_segments_max": 2,
+        "metric_envelope": {
+          "section_id": "sec_02b",
+          "label": "string",
+          "metric_min": {},
+          "metric_max": {},
+          "metric_expected_center": {},
+          "notes": "string"
+        }
+      }
+    }
+  ],
+  "add_bridge_facts": [
+    {
+      "bridge_id": "bridge_sec_02_sec_03_repair",
+      "from_section_id": "sec_02",
+      "to_section_id": "sec_03",
+      "start_day": 7,
+      "end_day": 8,
+      "time_elapsed": "string",
+      "offscreen_events": [
+        "string"
+      ],
+      "facts_available_to_later_sections": [
+        "string"
+      ],
+      "should_be_written_as_segment": false,
+      "continuity_notes": "string"
+    }
+  ],
+  "adjust_section_events": [
+    {
+      "section_id": "sec_03",
+      "append_mandatory_events": [
+        "string"
+      ],
+      "append_state_changes": [
+        "string"
+      ],
+      "repair_notes": "string"
+    }
+  ],
+  "adjust_metric_envelopes": [
+    {
+      "section_id": "sec_03",
+      "metric_expected_center": {
+        "metric_name": 50
+      },
+      "reason": "string"
+    }
+  ]
+}

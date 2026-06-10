@@ -16,6 +16,15 @@ Project meta:
 Story concept:
 {{STORY_CONCEPT_JSON}}
 
+Creative inspiration packet:
+{{CREATIVE_PACKET_JSON}}
+
+Additional instruction:
+Use the creative inspiration packet only as soft support for specificity, recurring objects, habits, pressures, relationship tension, or setting texture.
+Do not let it contradict the established concept.
+Do not force literal inclusion.
+Ignore any inspiration that harms consistency, clarity, or finishability.
+
 Task:
 Create a story bible for downstream section planning.
 

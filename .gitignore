@@ -1,3 +1,6 @@
+#prevent updaing api keys
+model_profiles.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -1,0 +1,13 @@
+Selected inspiration words:
+{{SELECTED_WORDS_JSON}}
+
+Task:
+Write at least {{SITUATION_COUNT}} ordinary-life situation sentences inspired by the selected words.
+
+Return valid JSON only with this schema:
+
+{
+  "everyday_situations": [
+    "one sentence situation"
+  ]
+}

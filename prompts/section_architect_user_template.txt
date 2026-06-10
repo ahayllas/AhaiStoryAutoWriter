@@ -1,29 +1,30 @@
-STRICT LANGUAGE RULE (HIGHEST PRIORITY):
-Although the system instructions are written in English, EVERYTHING you generate for story-facing content fields MUST FOLLOW the language used in the content of the story plan.
-
 You are planning ONE active section into a section-level execution blueprint.
-
 This blueprint will guide downstream per-segment expansion.
-Your goal is to prevent structural drift, repetition, and accidental re-planning of the same section every cycle.
+
+Your goal is to prevent structural drift, repetition, and accidental re-planning of the same section.
 
 Return JSON only.
 
 # Inputs you will receive
-You will be given data such as:
-- story plan
-- current active section status
-- current story state
-- existing section plan if any
-- metric guidance (secondary priority)
+You will only receive a carefully reduced context:
+- story_overview: Core story information (protagonist, premise, conflict, tone, etc.)
+- prev_section: The section before the current one (can be null)
+- current_section: The section you must plan right now (this is the focus)
+- next_section: The section after the current one (can be null)
+- current_story_state
+- existing_section_plan (if any)
+- metric_schema
+
+You should NOT assume knowledge of any other sections unless they are explicitly provided in the inputs above.
 
 # Output goals
-Produce a section plan for exactly ONE active section.
+Produce a section plan for exactly ONE active section following the required JSON schema.
 
 The plan must:
-1. cover the current active section only,
-2. decompose the section into distinct segment blueprints,
-3. assign mandatory events across the segment sequence,
-4. define what each segment must accomplish,
+1. Cover only the current active section.
+2. Decompose the section into distinct segment blueprints.
+3. Assign mandatory events across the segments deliberately.
+4. Define what each segment must accomplish and avoid.
 5. define what each segment must avoid repeating,
 6. remain compatible with the current story state,
 7. adapt if the section is already partially completed.
@@ -91,26 +92,18 @@ The plan must:
 
 # Planning rules
 
-- The number of segment_blueprints must be between planned_segments_min and planned_segments_max if available.
+- The number of segments must be between planned_segments_min and planned_segments_max if available.
 - If the section already has segment_count > 0, treat this as an adaptive planning problem:
   - preserve what is already done,
   - do not re-plan completed work,
   - adjust the remaining blueprints only.
-- Each segment blueprint must have a distinct job.
+- Each segment must have a distinct job.
 - "segment_objective" must be concrete and achievable in one segment.
 - "primary_beat" must be specific and observable.
 - "mandatory_events_assigned" should distribute remaining mandatory events deliberately instead of repeating them everywhere.
 - "must_not_repeat" should explicitly block likely redundancy from earlier or adjacent segments.
 - "must_not_resolve_yet" should protect pacing and prevent premature payoff.
 - "expected_end_state" must describe a changed state, not just mood.
-
-# Priority rules
-When tradeoffs exist, prioritize in this order:
-1. continuity with current story state
-2. non-redundant section progression
-3. section completion feasibility
-4. causal coherence
-5. metric preferences
 
 # Anti-failure rules
 - Do not produce multiple blueprints that all say versions of "conflict escalates".
@@ -119,19 +112,40 @@ When tradeoffs exist, prioritize in this order:
 - Do not leave the section without a credible path to desired_end_state.
 - Do not produce vague labels instead of executable structural guidance.
 
-Return JSON only.
 
-Story plan:
-{{STORY_PLAN_JSON}}
+story overview:
+```
+{{STORY_OVERVIEW_JSON}}
+```
 
-Current section status:
-{{CURRENT_SECTION_STATUS_JSON}}
+previous section:
+```
+{{PREV_SECTION_JSON}}
+```
+current section:
+```
+{{CURRENT_SECTION_JSON}}
+```
 
-Current story state:
+Next section:
+```
+{{NEXT_SECTION_JSON}}
+```
+
+current story state:
+```
 {{CURRENT_STORY_STATE_JSON}}
+```
 
-Existing section plan:
+existing section plan:
+```
 {{EXISTING_SECTION_PLAN_JSON}}
+```
 
-Metric schema:
+metric schema:
+```
 {{METRIC_SCHEMA_JSON}}
+```
+
+Plan the "current section" only.
+Return JSON only.

@@ -1,0 +1,44 @@
+Create the authoritative section entry plan.
+
+Story overview:
+{{STORY_OVERVIEW_JSON}}
+
+Previous section:
+{{PREV_SECTION_JSON}}
+
+Current section:
+{{CURRENT_SECTION_JSON}}
+
+Incoming bridge:
+{{INCOMING_BRIDGE_JSON}}
+
+Outgoing bridge:
+{{OUTGOING_BRIDGE_JSON}}
+
+Time context:
+{{TIME_CONTEXT_JSON}}
+
+Current section status:
+{{CURRENT_SECTION_STATUS_JSON}}
+
+Current story state:
+{{CURRENT_STORY_STATE_JSON}}
+
+Existing section plan:
+{{EXISTING_SECTION_PLAN_JSON}}
+
+Existing entry plan:
+{{EXISTING_ENTRY_PLAN_JSON}}
+
+Metric schema:
+{{METRIC_SCHEMA_JSON}}
+
+Instructions:
+- If this is effectively Section 1 or opening section, plan an opening_entry for the whole story heavily based on story settings
+- If there is prior continuity to carry, plan a bridge_entry
+- Use the time context explicitly to anchor the entry in relation to the prior section
+- The entry must prepare the true section body, not replace it
+- The writer will be a follower model, so make the prose_contract concrete, specific, and hard to misread
+- The authoritative_state_patch should reflect planner-owned state decisions, not writer-inferred state
+- Be conservative if previous continuity, bridge details, or elapsed time are ambiguous
+- Output strict JSON only

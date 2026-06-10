@@ -15,64 +15,49 @@ from utils import fill_template
 
 
 class SectionPlanExhaustedError(RuntimeError):
-    """Raised when the current section is still active but no matching blueprint remains."""
+    pass
 
 
 class SectionExpander:
-    """
-    Segment-level executor that must follow the current section plan.
-
-    Despite the legacy class name, this component should only expand
-    exactly one segment blueprint into one executable segment plan.
-    """
-
     def __init__(self, llm_client) -> None:
         self.llm_client = llm_client
 
-    def _pick_segment_blueprint(
-        self,
-        section_plan: dict,
-        queue_item: dict,
-    ) -> dict:
-        blueprints = section_plan.get("segment_blueprints", [])
-        if not isinstance(blueprints, list):
-            blueprints = []
+    def _build_story_context(self, story_plan: dict) -> dict:
+        """Returns minimal context for the expander."""
+        protagonist = story_plan.get("protagonist", {})
+        return {
+            "protagonist": {
+                "name": protagonist.get("name"),
+                "goal": protagonist.get("goal"),
+                "inner_need": protagonist.get("inner_need"),
+                "starting_flaw": protagonist.get("starting_flaw_or_limitation"),
+            },
+            "tone": story_plan.get("tone"),
+            "genre": story_plan.get("genre"),
+            "setting": story_plan.get("setting"),
+        }
 
+    def _pick_segment_blueprint(self, section_plan: dict, queue_item: dict) -> dict:
+        blueprints = section_plan.get("segment_blueprints", [])
         target_index = int(queue_item.get("section_step", 0) or 0)
 
-        # 1) exact match by segment_index
         for bp in blueprints:
-            if not isinstance(bp, dict):
-                continue
-            try:
-                if int(bp.get("segment_index", 0) or 0) == target_index:
-                    return bp
-            except Exception:
-                continue
-
-        # 2) fallback by alternative step keys
-        for bp in blueprints:
-            if not isinstance(bp, dict):
-                continue
-            for key in ("section_step", "ordinal", "step"):
-                try:
-                    if int(bp.get(key, 0) or 0) == target_index:
-                        return bp
-                except Exception:
-                    continue
-
-        # 3) fallback by 1-based position
-        idx = target_index - 1
-        if 0 <= idx < len(blueprints):
-            bp = blueprints[idx]
-            if isinstance(bp, dict):
+            if int(bp.get("segment_index", 0) or 0) == target_index:
                 return bp
 
+        for bp in blueprints:
+            for key in ("section_step", "ordinal", "step"):
+                if int(bp.get(key, 0) or 0) == target_index:
+                    return bp
+
+        idx = target_index - 1
+        if 0 <= idx < len(blueprints):
+            return blueprints[idx]
         return {}
 
     def build_user_prompt(
         self,
-        story_plan: dict,
+        story_context: dict,
         current_section_status: dict,
         current_section_plan: dict,
         target_segment_blueprint: dict,
@@ -82,7 +67,7 @@ class SectionExpander:
     ) -> str:
         template = load_text(EXPANDER_USER_TEMPLATE_PATH)
         return fill_template(template, {
-            "STORY_PLAN_JSON": story_plan,
+            "STORY_CONTEXT_JSON": story_context,
             "CURRENT_SECTION_STATUS_JSON": current_section_status,
             "CURRENT_SECTION_PLAN_JSON": current_section_plan,
             "TARGET_SEGMENT_BLUEPRINT_JSON": target_segment_blueprint,
@@ -101,33 +86,16 @@ class SectionExpander:
             raise RuntimeError("Missing current section plan.")
 
         target_segment_blueprint = self._pick_segment_blueprint(
-            section_plan=current_section_plan,
-            queue_item=queue_item,
+            current_section_plan, queue_item
         )
         if not target_segment_blueprint:
-            blueprints = current_section_plan.get("segment_blueprints", [])
-            available_indexes = []
-            for bp in blueprints:
-                if not isinstance(bp, dict):
-                    continue
-                available_indexes.append({
-                    "segment_index": bp.get("segment_index"),
-                    "section_step": bp.get("section_step"),
-                    "ordinal": bp.get("ordinal"),
-                    "step": bp.get("step"),
-                    "segment_id": bp.get("segment_id"),
-                })
+            raise SectionPlanExhaustedError(...)
 
-            raise SectionPlanExhaustedError(
-                "SECTION_PLAN_EXHAUSTED: no target segment blueprint for current queue item. "
-                f"section_id={current_section_status.get('section_id')!r}, "
-                f"queue_item={queue_item!r}, "
-                f"available_blueprints={available_indexes!r}"
-            )
+        story_context = self._build_story_context(story_plan)
 
         system_prompt = load_text(EXPANDER_SYSTEM_PATH)
         user_prompt = self.build_user_prompt(
-            story_plan=story_plan,
+            story_context=story_context,
             current_section_status=current_section_status,
             current_section_plan=current_section_plan,
             target_segment_blueprint=target_segment_blueprint,
